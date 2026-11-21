@@ -109,8 +109,10 @@ class _EcranAccueilState extends State<EcranAccueil> {
         action: SnackBarAction(
           label: 'Annuler',
           onPressed: () {
+            if (!mounted) return;
             setState(() {
-              _taches.insert(index, supprimee);
+              final position = index.clamp(0, _taches.length);
+              _taches.insert(position, supprimee);
               _idTacheSelectionnee = supprimee.id;
             });
           },
@@ -137,7 +139,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
         builder: (_) => EcranDetail(
           tache: tache,
           aujourdhui: _aujourdhui,
-          onBasculerFait: (t) => _basculerTache(t.id),
+          onBasculerFait: () => _basculerTache(tache.id),
           onModifier: _modifierTache,
           onSupprimer: _supprimerTache,
         ),
@@ -254,6 +256,12 @@ class _EcranAccueilState extends State<EcranAccueil> {
     }
 
     // Tri interne des groupes
+    enRetard.sort((a, b) {
+      final da = (a.echeance as DatePrecise).date;
+      final db = (b.echeance as DatePrecise).date;
+      return da.compareTo(db);
+    });
+
     datees.sort((a, b) {
       final da = (a.echeance as DatePrecise).date;
       final db = (b.echeance as DatePrecise).date;

@@ -21,7 +21,7 @@ class EcranDetail extends StatefulWidget {
   final DateTime aujourdhui;
 
   /// Rappelé pour basculer l'état fait / à faire.
-  final void Function(Tache tache) onBasculerFait;
+  final VoidCallback onBasculerFait;
 
   /// Rappelé pour enregistrer une tâche modifiée.
   final void Function(Tache tache) onModifier;
@@ -59,10 +59,7 @@ class _EcranDetailState extends State<EcranDetail> {
   }
 
   void _basculerEtFermer() {
-    final nouvelleTache = _tacheCourante.copierAvec(
-      faite: !_tacheCourante.faite,
-    );
-    widget.onBasculerFait(nouvelleTache);
+    widget.onBasculerFait();
     if (mounted) {
       Navigator.of(context).pop();
     }

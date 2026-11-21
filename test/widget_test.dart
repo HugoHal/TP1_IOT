@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mes_taches/ecrans/ecran_formulaire.dart';
 import 'package:mes_taches/main.dart';
+import 'package:mes_taches/widgets/tuile_tache.dart';
 
 void main() {
   final dateFixe = DateTime(2026, 11, 21, 10, 0);
@@ -165,7 +166,7 @@ void main() {
   );
 
   testWidgets(
-    'E1 : créer une tâche valide avec date l’ajoute à la liste et met à jour le compteur',
+    'E1 : créer une tâche valide l’ajoute à la liste (avec nettoyage des espaces) et met à jour le compteur',
     (tester) async {
       await tester.pumpWidget(MesTachesApp(aujourdhui: dateFixe));
       await tester.pumpAndSettle();
@@ -176,16 +177,15 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
 
-      // Remplir le titre
+      // Remplir le titre avec des espaces superflus en début et fin
       final champTitre = find.byType(TextFormField).first;
-      await tester.enterText(champTitre, 'Préparer le TP 2');
+      await tester.enterText(champTitre, '  Préparer le TP 2  ');
 
-      // Choisir une date future (simuler la sélection)
       // Cliquer sur 'Enregistrer'
       await tester.tap(find.text('Enregistrer'));
       await tester.pumpAndSettle();
 
-      // De retour sur l'accueil, le compteur passe à 6
+      // De retour sur l'accueil, le compteur passe à 6 et le titre est nettoyé
       expect(find.text('6 à faire'), findsOneWidget);
       await tester.scrollUntilVisible(find.text('Préparer le TP 2'), 200);
       expect(find.text('Préparer le TP 2'), findsOneWidget);
@@ -246,9 +246,14 @@ void main() {
       await tester.tap(find.text('Annuler'));
       await tester.pumpAndSettle();
 
-      // La tâche est restaurée
+      // La tâche est restaurée à son index d'origine (index 1, juste après t1)
       expect(find.text('Relire le CM 01'), findsOneWidget);
       expect(find.text('5 à faire'), findsOneWidget);
+      final titresApresAnnulation = tester
+          .widgetList<TuileTache>(find.byType(TuileTache))
+          .map((t) => t.tache.titre)
+          .toList();
+      expect(titresApresAnnulation[1], 'Relire le CM 01');
     },
   );
 

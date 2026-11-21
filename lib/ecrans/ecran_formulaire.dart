@@ -24,7 +24,6 @@ class _EcranFormulaireState extends State<EcranFormulaire> {
   late final TextEditingController _noteController;
 
   late Priorite _priorite;
-  late Echeance _echeance;
   DateTime? _dateChoisie;
   int? _jourHebdoChoisi;
 
@@ -43,9 +42,9 @@ class _EcranFormulaireState extends State<EcranFormulaire> {
     _titreController = TextEditingController(text: t?.titre ?? '');
     _noteController = TextEditingController(text: t?.note ?? '');
     _priorite = t?.priorite ?? Priorite.normale;
-    _echeance = t?.echeance ?? const Echeance.aucune();
+    final echeanceInitiale = t?.echeance ?? const Echeance.aucune();
 
-    switch (_echeance) {
+    switch (echeanceInitiale) {
       case SansEcheance():
         _typeEcheance = 0;
       case DatePrecise(:final date):
@@ -77,11 +76,10 @@ class _EcranFormulaireState extends State<EcranFormulaire> {
       lastDate: DateTime(2040, 12, 31),
     );
 
-    if (date != null) {
+    if (date != null && mounted) {
       setState(() {
         _dateChoisie = date;
         _typeEcheance = 1;
-        _echeance = Echeance.date(date);
       });
     }
   }
@@ -213,7 +211,10 @@ class _EcranFormulaireState extends State<EcranFormulaire> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           ChoiceChip(
                             label: const Text('Aucune'),
@@ -222,13 +223,11 @@ class _EcranFormulaireState extends State<EcranFormulaire> {
                               if (sel) {
                                 setState(() {
                                   _typeEcheance = 0;
-                                  _echeance = const Echeance.aucune();
                                 });
                                 field.didChange(null);
                               }
                             },
                           ),
-                          const SizedBox(width: 8),
                           ChoiceChip(
                             label: Text(
                               _dateChoisie != null
@@ -239,7 +238,9 @@ class _EcranFormulaireState extends State<EcranFormulaire> {
                             onSelected: (sel) {
                               if (sel) {
                                 _choisirDate().then((_) {
-                                  field.didChange(_dateChoisie);
+                                  if (mounted) {
+                                    field.didChange(_dateChoisie);
+                                  }
                                 });
                               }
                             },
@@ -250,7 +251,9 @@ class _EcranFormulaireState extends State<EcranFormulaire> {
                               tooltip: 'Changer la date',
                               onPressed: () {
                                 _choisirDate().then((_) {
-                                  field.didChange(_dateChoisie);
+                                  if (mounted) {
+                                    field.didChange(_dateChoisie);
+                                  }
                                 });
                               },
                             ),
@@ -261,7 +264,6 @@ class _EcranFormulaireState extends State<EcranFormulaire> {
                                 setState(() {
                                   _typeEcheance = 0;
                                   _dateChoisie = null;
-                                  _echeance = const Echeance.aucune();
                                 });
                                 field.didChange(null);
                               },

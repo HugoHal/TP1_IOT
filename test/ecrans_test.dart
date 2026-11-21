@@ -241,7 +241,7 @@ void main() {
           home: EcranDetail(
             tache: t,
             aujourdhui: dateRef,
-            onBasculerFait: (_) {},
+            onBasculerFait: () {},
             onModifier: (_) {},
             onSupprimer: (id) => supprimeId = id,
           ),
