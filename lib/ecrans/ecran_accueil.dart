@@ -222,6 +222,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
     }
 
     return ListView.separated(
+      padding: const EdgeInsets.only(bottom: 88),
       itemCount: listeTriee.length,
       separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
@@ -286,6 +287,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
     ];
 
     return ListView(
+      padding: const EdgeInsets.only(bottom: 88),
       children: [
         for (final section in sections)
           if (section.taches.isNotEmpty) ...[
@@ -303,8 +305,10 @@ class _EcranAccueilState extends State<EcranAccueil> {
                 ),
               ),
             ),
-            for (final t in section.taches)
-              _construireTuileDismissible(t, estGrandEcran),
+            for (var i = 0; i < section.taches.length; i++) ...[
+              _construireTuileDismissible(section.taches[i], estGrandEcran),
+              if (i < section.taches.length - 1) const Divider(height: 1),
+            ],
           ],
       ],
     );
@@ -463,13 +467,36 @@ class _EcranAccueilState extends State<EcranAccueil> {
                 initialValue: _triActif,
                 onSelected: (tri) => setState(() => _triActif = tri),
                 itemBuilder: (context) => TriTaches.values
-                    .map((t) => PopupMenuItem(value: t, child: Text(t.libelle)))
+                    .map(
+                      (t) => PopupMenuItem<TriTaches>(
+                        value: t,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              child: _triActif == t
+                                  ? const Icon(Icons.check, size: 18)
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                t.libelle,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
             ],
           ),
           body: estGrandEcran
               ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SizedBox(
                       width: 380,

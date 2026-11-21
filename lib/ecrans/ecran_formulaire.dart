@@ -138,186 +138,225 @@ class _EcranFormulaireState extends State<EcranFormulaire> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Champ Titre
-              TextFormField(
-                controller: _titreController,
-                decoration: const InputDecoration(
-                  labelText: 'Titre *',
-                  hintText: 'Que devez-vous accomplir ?',
-                  border: OutlineInputBorder(),
-                ),
-                autofocus: !estModification,
-                validator: (valeur) {
-                  final texte = (valeur ?? '').trim();
-                  if (texte.isEmpty) {
-                    return 'Le titre est obligatoire.';
-                  }
-                  if (texte.length > 60) {
-                    return 'Le titre ne doit pas dépasser 60 caractères.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Champ Titre
+                  TextFormField(
+                    controller: _titreController,
+                    decoration: const InputDecoration(
+                      labelText: 'Titre *',
+                      hintText: 'Que devez-vous accomplir ?',
+                      border: OutlineInputBorder(),
+                    ),
+                    autofocus: !estModification,
+                    validator: (valeur) {
+                      final texte = (valeur ?? '').trim();
+                      if (texte.isEmpty) {
+                        return 'Le titre est obligatoire.';
+                      }
+                      if (texte.length > 60) {
+                        return 'Le titre ne doit pas dépasser 60 caractères.';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
 
-              // Champ Priorité
-              Text('Priorité', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              SegmentedButton<Priorite>(
-                segments: Priorite.values
-                    .map(
-                      (p) => ButtonSegment<Priorite>(
-                        value: p,
-                        label: Text(p.libelle),
+                  // Champ Priorité
+                  Text(
+                    'Priorité',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<Priorite>(
+                      showSelectedIcon: false,
+                      style: const ButtonStyle(
+                        visualDensity: VisualDensity.compact,
+                        padding: WidgetStatePropertyAll(
+                          EdgeInsets.symmetric(horizontal: 8),
+                        ),
                       ),
-                    )
-                    .toList(),
-                selected: {_priorite},
-                onSelectionChanged: (nouveauSet) {
-                  setState(() => _priorite = nouveauSet.first);
-                },
-              ),
-              const SizedBox(height: 24),
+                      segments: Priorite.values
+                          .map(
+                            (p) => ButtonSegment<Priorite>(
+                              value: p,
+                              label: Text(
+                                p.libelle,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      selected: {_priorite},
+                      onSelectionChanged: (nouveauSet) {
+                        setState(() => _priorite = nouveauSet.first);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
-              // Champ Échéance
-              Text('Échéance', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              FormField<DateTime?>(
-                initialValue: _dateChoisie,
-                validator: (val) {
-                  if (_typeEcheance == 1) {
-                    if (_dateChoisie == null) {
-                      return 'Veuillez choisir une date.';
-                    }
-                    final dateRef = _aujourdhuiRef;
-                    final dateChoisieCal = DateTime(
-                      _dateChoisie!.year,
-                      _dateChoisie!.month,
-                      _dateChoisie!.day,
-                    );
-                    if (dateChoisieCal.isBefore(dateRef)) {
-                      return 'La date ne peut pas être passée.';
-                    }
-                  }
-                  return null;
-                },
-                builder: (field) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        crossAxisAlignment: WrapCrossAlignment.center,
+                  // Champ Échéance
+                  Text(
+                    'Échéance',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  FormField<DateTime?>(
+                    initialValue: _dateChoisie,
+                    validator: (val) {
+                      if (_typeEcheance == 1) {
+                        if (_dateChoisie == null) {
+                          return 'Veuillez choisir une date.';
+                        }
+                        final dateRef = _aujourdhuiRef;
+                        final dateChoisieCal = DateTime(
+                          _dateChoisie!.year,
+                          _dateChoisie!.month,
+                          _dateChoisie!.day,
+                        );
+                        if (dateChoisieCal.isBefore(dateRef)) {
+                          return 'La date ne peut pas être passée.';
+                        }
+                      }
+                      return null;
+                    },
+                    builder: (field) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ChoiceChip(
-                            label: const Text('Aucune'),
-                            selected: _typeEcheance == 0,
-                            onSelected: (sel) {
-                              if (sel) {
-                                setState(() {
-                                  _typeEcheance = 0;
-                                });
-                                field.didChange(null);
-                              }
-                            },
-                          ),
-                          ChoiceChip(
-                            label: Text(
-                              _dateChoisie != null
-                                  ? 'Le ${_dateChoisie!.day}/${_dateChoisie!.month}/${_dateChoisie!.year}'
-                                  : 'Choisir une date',
-                            ),
-                            selected: _typeEcheance == 1,
-                            onSelected: (sel) {
-                              if (sel) {
-                                _choisirDate().then((_) {
-                                  if (mounted) {
-                                    field.didChange(_dateChoisie);
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              ChoiceChip(
+                                label: const Text('Aucune'),
+                                selected: _typeEcheance == 0,
+                                onSelected: (sel) {
+                                  if (sel) {
+                                    setState(() {
+                                      _typeEcheance = 0;
+                                    });
+                                    field.didChange(null);
                                   }
-                                });
-                              }
-                            },
-                          ),
-                          if (_typeEcheance == 1) ...[
-                            IconButton(
-                              icon: const Icon(Icons.edit_calendar),
-                              tooltip: 'Changer la date',
-                              onPressed: () {
-                                _choisirDate().then((_) {
-                                  if (mounted) {
-                                    field.didChange(_dateChoisie);
+                                },
+                              ),
+                              ChoiceChip(
+                                label: Text(
+                                  _dateChoisie != null
+                                      ? 'Le ${_dateChoisie!.day}/${_dateChoisie!.month}/${_dateChoisie!.year}'
+                                      : 'Choisir une date',
+                                ),
+                                selected: _typeEcheance == 1,
+                                onSelected: (sel) {
+                                  if (sel) {
+                                    _choisirDate().then((_) {
+                                      if (mounted) {
+                                        field.didChange(_dateChoisie);
+                                      }
+                                    });
                                   }
-                                });
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.clear),
-                              tooltip: 'Supprimer l’échéance',
-                              onPressed: () {
-                                setState(() {
-                                  _typeEcheance = 0;
-                                  _dateChoisie = null;
-                                });
-                                field.didChange(null);
-                              },
+                                },
+                              ),
+                              if (_typeEcheance == 2 &&
+                                  _jourHebdoChoisi != null)
+                                ChoiceChip(
+                                  label: Text(
+                                    libelleEcheance(
+                                      Echeance.hebdomadaire(_jourHebdoChoisi!),
+                                    ),
+                                  ),
+                                  selected: true,
+                                  onSelected: (_) {},
+                                ),
+                              if (_typeEcheance == 1) ...[
+                                IconButton(
+                                  icon: const Icon(Icons.edit_calendar),
+                                  tooltip: 'Changer la date',
+                                  onPressed: () {
+                                    _choisirDate().then((_) {
+                                      if (mounted) {
+                                        field.didChange(_dateChoisie);
+                                      }
+                                    });
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  tooltip: 'Supprimer l’échéance',
+                                  onPressed: () {
+                                    setState(() {
+                                      _typeEcheance = 0;
+                                      _dateChoisie = null;
+                                    });
+                                    field.didChange(null);
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                          if (field.hasError) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              field.errorText!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ],
-                      ),
-                      if (field.hasError) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          field.errorText!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // Champ Note
-              TextFormField(
-                controller: _noteController,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Note (facultative)',
-                  hintText: 'Détails, liens ou mémos...',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (valeur) {
-                  final texte = (valeur ?? '').trim();
-                  if (texte.length > 200) {
-                    return 'La note ne doit pas dépasser 200 caractères.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 32),
-
-              // Bouton Enregistrer en bas
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _enregistrer,
-                  icon: const Icon(Icons.save),
-                  label: Text(
-                    estModification ? 'Mettre à jour' : 'Créer la tâche',
+                      );
+                    },
                   ),
-                ),
+                  const SizedBox(height: 24),
+
+                  // Champ Note
+                  TextFormField(
+                    controller: _noteController,
+                    maxLines: 4,
+                    decoration: const InputDecoration(
+                      labelText: 'Note (facultative)',
+                      hintText: 'Détails, liens ou mémos...',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (valeur) {
+                      final texte = (valeur ?? '').trim();
+                      if (texte.length > 200) {
+                        return 'La note ne doit pas dépasser 200 caractères.';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Bouton Enregistrer en bas
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: _enregistrer,
+                        icon: const Icon(Icons.save),
+                        label: Text(
+                          estModification ? 'Mettre à jour' : 'Créer la tâche',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

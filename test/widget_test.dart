@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mes_taches/ecrans/ecran_detail.dart';
 import 'package:mes_taches/ecrans/ecran_formulaire.dart';
 import 'package:mes_taches/main.dart';
+import 'package:mes_taches/modele/taches.dart';
 import 'package:mes_taches/widgets/tuile_tache.dart';
 
 void main() {
@@ -336,6 +338,62 @@ void main() {
 
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
+    },
+  );
+
+  testWidgets(
+    'C3 : aucun débordement à 360 px et 1280 px sur EcranDetail (titre long) et EcranFormulaire (avec date)',
+    (tester) async {
+      final tacheLongue = Tache(
+        id: 't_long',
+        titre: 'A' * 60,
+        priorite: Priorite.haute,
+        echeance: Echeance.date(DateTime(2026, 11, 25)),
+        note: 'Une note de test suffisamment longue pour tester le rendu.',
+      );
+
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      for (final largeur in [360.0, 1280.0]) {
+        tester.view.physicalSize = Size(largeur, 800);
+        tester.view.devicePixelRatio = 1.0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EcranDetail(
+              tache: tacheLongue,
+              aujourdhui: dateFixe,
+              onBasculerFait: () {},
+              onModifier: (_) {},
+              onSupprimer: (_) {},
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          tester.takeException(),
+          isNull,
+          reason: 'Débordement sur EcranDetail à $largeur px',
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: EcranFormulaire(
+              tacheExistante: tacheLongue,
+              dateReference: dateFixe,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          tester.takeException(),
+          isNull,
+          reason: 'Débordement sur EcranFormulaire à $largeur px',
+        );
+      }
     },
   );
 }
